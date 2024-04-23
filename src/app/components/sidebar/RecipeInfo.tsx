@@ -9,9 +9,9 @@ interface RecipeInfoProps {
 
 const RecipeInfo: React.FC<RecipeInfoProps> = ({ recipe, onArrowClick }) => {
   return (
-    <div className="flex flex-col bg-slate-100 border-2 border-gray-400 rounded-lg h-full w-full shadow-xl">
+    <div className="flex flex-col bg-slate-100 border-2 border-gray-400 rounded-lg h-full w-full shadow-xl ml-1">
       <div className="relative flex flex-row items-center justify-center p-2">
-        <div className="absolute left-2" onClick={onArrowClick}>
+        <div className="absolute left-2 cursor-pointer" onClick={onArrowClick}>
           <ArrowLeft02Icon color={"#000000"} />
         </div>
         <div className="text-xl font-bold">{recipe?.metadata.title}</div>
@@ -28,7 +28,7 @@ const RecipeInfo: React.FC<RecipeInfoProps> = ({ recipe, onArrowClick }) => {
         <div className="font-bold mr-1.5">Recipe Details:</div>
         {recipe?.metadata.source_url && (
           <a
-            className="underline text-blue-600"
+            className="underline text-blue-600 break-all"
             href={recipe.metadata.source_url}
             target="_blank"
             rel="noopener noreferrer"

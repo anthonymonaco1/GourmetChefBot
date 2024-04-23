@@ -3,14 +3,16 @@
 import Send from "../icons/send";
 import { AnimatePresence, motion } from "framer-motion";
 import { Toaster, toast } from "react-hot-toast";
-import { useState, Fragment } from "react";
+import { useState, Fragment, useRef, useEffect } from "react";
 import { Recipe } from "@/app/types";
 import { supabaseClient } from "@/app/utils/supabase/client";
 import RecipeBox from "../sidebar/RecipeBox";
 import RecipeInfo from "../sidebar/RecipeInfo";
 import LoadingDots from "../generics/LoadingDots";
+import IntroMessage from "../generics/IntroMessage";
 
 export default function ChatBox() {
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [showRecipeInfo, setShowRecipeInfo] = useState(false);
@@ -199,6 +201,13 @@ export default function ChatBox() {
     setShowRecipeInfo(true);
   };
 
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      const { scrollHeight, clientHeight } = chatContainerRef.current;
+      chatContainerRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+  }, [chatLog]);
+
   return (
     <div className="flex flex-grow max-h-9/10">
       <Toaster
@@ -206,12 +215,12 @@ export default function ChatBox() {
         reverseOrder={false}
         toastOptions={{ duration: 2000 }}
       />
-      <div className="max-h-full w-1/3 border-r-2 border-eton-blue p-4 pt-3 overflow-y-auto overflow-x-hidden relative">
+      <div className="w-1/3 border-r-2 border-eton-blue p-4 overflow-y-auto overflow-x-hidden relative">
         <div
           className={
             showRecipeInfo
-              ? "slide-out absolute w-11/12"
-              : "slide-in absolute w-11/12"
+              ? "slide-out absolute w-11/12 pb-4"
+              : "slide-in absolute w-11/12 pb-4"
           }
         >
           {recipeObjects.length !== 0 ? (
@@ -223,7 +232,9 @@ export default function ChatBox() {
               />
             ))
           ) : (
-            <div className="text-black">Relevant recipes will appear here!</div>
+            <div className="text-black absolute inset-x-1/5 font-semibold">
+              Relevant recipes will appear here!
+            </div>
           )}
         </div>
         <div
@@ -239,8 +250,14 @@ export default function ChatBox() {
           />
         </div>
       </div>
-      <div className="text-black w-2/3 flex-col">
-        <div className="border-b-2 border-eton-blue h-5/6 overflow-y-scroll">
+      <div className="text-black w-2/3 flex-col h-full">
+        <div
+          className="border-b-2 border-eton-blue h-5/6 overflow-y-scroll"
+          ref={chatContainerRef}
+        >
+          <div className="p-5">
+            <IntroMessage />
+          </div>
           {chatLog.map((chat, index) => (
             <Fragment key={index}>
               <div className="flex flex-row justify-end p-6 rounded-2xl ml-16">
@@ -271,7 +288,7 @@ export default function ChatBox() {
               onSubmit={generateAnswer}
             >
               <input
-                className="h-16 outline-none p-3 rounded-xl w-11/12 resize-none flex items-center bg-slate-100"
+                className="h-14 outline-none p-3 rounded-xl w-11/12 resize-none flex items-center bg-slate-100"
                 value={userQuestion}
                 onChange={handleTextChange}
                 placeholder="Ask me about recipes here!"

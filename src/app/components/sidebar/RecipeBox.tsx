@@ -9,9 +9,9 @@ interface RecipeBoxProps {
 
 const RecipeBox: React.FC<RecipeBoxProps> = ({ recipe, onArrowClick }) => {
   return (
-    <div className="bg-slate-100 border-2 border-gray-400 p-5 m-1.5 rounded-xl flex flex-row justify-between shadow-lg">
+    <div className="bg-slate-100 border-2 border-gray-400 p-5 m-1.5 rounded-xl flex flex-row justify-between shadow-lg w-full">
       <h2 className="font-semibold text-lg">{recipe.metadata.title}</h2>
-      <div onClick={onArrowClick}>
+      <div className="cursor-pointer" onClick={onArrowClick}>
         <ArrowRight02Icon color={"#000000"} />
       </div>
     </div>

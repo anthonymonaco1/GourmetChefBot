@@ -1,39 +1,12 @@
-import React, { useState, useEffect } from "react";
-// import { useRouter } from "next/router";
+import React from "react";
 
 const Header = () => {
-  //   const router = useRouter();
-
-  //   const handleclick = () => {
-  //     if (isLoggedIn) {
-  //       if (router.pathname === "/home") {
-  //         window.location.reload(); // Reload the page if the user is on the "/home" page
-  //       } else {
-  //         router.push("/home");
-  //       }
-  //     } else {
-  //       if (router.pathname === "/") {
-  //         window.location.reload(); // Reload the page if the user is on the "/home" page
-  //       } else {
-  //         router.push("/");
-  //       }
-  //     }
-  //   };
-
   return (
-    <div className="flex space-x-3 w-full items-center p-5 h-16 border-r border-b border-borders">
-      <div className="flex flex-row justify-between w-full items-center">
-        <div
-          className="flex flex-row items-center space-x-2 cursor-pointer ml-1"
-          //   onClick={handleclick}
-        >
-          <div className="flex flex-row text-xl">
-            <div className="text-headerBlack font-semibold">Gordon</div>
-            <div className="text-crimsonDefault font-semibold">RamsAI</div>
-          </div>
+    <div className="flex w-full items-center justify-center p-5 h-1/12 border-b-2 border-eton-blue">
+        <div className="bg-powder-blue text-3xl font-extrabold brightness-105 italic p-2 pr-4 rounded-2xl shadow-xl">
+          <div>Ask Chef RamsAi!</div>
         </div>
       </div>
-    </div>
   );
 };
 

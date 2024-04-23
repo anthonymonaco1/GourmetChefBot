@@ -35,4 +35,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-chicken_recipes.json
+# recipe jsons
+recipes.json
