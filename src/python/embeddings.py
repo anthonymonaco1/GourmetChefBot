@@ -5,11 +5,10 @@ import requests
 import os
 from dotenv import load_dotenv
 from supabase_py import create_client, Client
+import time
 
 # Load environment variables
 load_dotenv('.env.local')
-
-# print(os.getenv("NEXT_PUBLIC_SUPABASE_URL"))
 
 # Connect to Supabase
 url: str = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
@@ -108,34 +107,108 @@ def process_recipe(recipe):
 
     return content.dict(), metadata.dict()
 
-# Load your recipes JSON
-with open('chicken_recipes.json', 'r') as file:
-    recipes = json.load(file)
+# Load Edamam keys and define queries array
+edamam_id: str = os.getenv("EDAMAM_APP_ID")
+edamam_key: str = os.getenv("EDAMAM_APP_KEY")
+queries = [
+    "Vegan desserts",
+    "Gluten-free breakfasts",
+    "Italian pasta dishes",
+    "Mexican street food",
+    "French patisserie",
+    "Chinese dim sum",
+    "Indian vegetarian",
+    "Japanese ramen",
+    "Mediterranean salads",
+    "Brazilian snacks",
+    "Thai seafood",
+    "Moroccan tagines",
+    "Spanish tapas",
+    "Greek gyros",
+    "American barbecue",
+    "Korean bibimbap",
+    "Turkish kebabs",
+    "British pies",
+    "Caribbean jerk chicken",
+    "Polish soups",
+    "Egyptian ful medames",
+    "Dutch stamppot",
+    "Argentinian empanadas",
+    "Ethiopian injera and stews",
+    "Filipino adobo",
+    "German sausages",
+    "South African bunny chow",
+    "Russian borscht",
+    "Canadian poutine",
+    "Vietnamese pho",
+    "Low-carb lunches",
+    "High-protein snacks",
+    "Paleo-friendly dinners",
+    "Kid-friendly meals",
+    "Quick 20-minute dinners",
+    "Slow cooker recipes",
+    "Dairy-free baking",
+    "Nut-free treats",
+    "Festive holiday dishes",
+    "Comfort food classics",
+    "Seafood grills",
+    "Vegan protein bowls",
+    "Gluten-free pasta alternatives",
+    "Breakfast smoothies",
+    "Decadent chocolate desserts",
+    "Cold summer soups",
+    "Winter warmers",
+    "Budget-friendly meals",
+    "Fermented foods",
+    "Raw food recipes"
+]
 
-# Generate embeddings for each recipe and insert data into Supabase
-hits = recipes["hits"]
-for i,hit in enumerate(hits):
-    recipe = hit["recipe"]
-    content, metadata = process_recipe(recipe)
+# Function to make API call
+def get_recipes(query):
+    response = requests.get(
+        'https://api.edamam.com/api/recipes/v2',
+        params={
+            'type': 'public',
+            'q': query,
+            'app_id': edamam_id,
+            'app_key': edamam_key
+        }
+    )
+    return response.json()
 
-    # Insert `content` and `metadata` into Supabase here
-    content_text = serialize_content(content)
-    embedding = generate_embedding(content_text)
+# Iterate over queries
+for i, query in enumerate(queries):
+    # Get recipes JSON
+    print('Query #: ', i+1)
+    recipes = get_recipes(query)
 
-    if not embedding:
-        continue
+    # Generate embeddings for each recipe and insert data into Supabase
+    hits = recipes["hits"]
+    for i, hit in enumerate(hits):
+        recipe = hit["recipe"]
+        content, metadata = process_recipe(recipe)
 
-    response = supabase.table("documents").insert([{
-        "content": content_text,
-        "embedding": embedding,
-        "metadata": metadata
-    }]).execute()
+        # Insert `content` and `metadata` into Supabase here
+        content_text = serialize_content(content)
+        embedding = generate_embedding(content_text)
 
-    if 'error' in response or 'data' not in response or not response['data']:
-        print(f"Error inserting recipe into database")
-        print(f"Response: {response}")
-        continue
+        if not embedding:
+            continue
 
-    print('Entry #: ', i+1)
+        response = supabase.table("documents").insert([{
+            "content": content_text,
+            "embedding": embedding,
+            "metadata": metadata
+        }]).execute()
+
+        if 'error' in response or 'data' not in response or not response['data']:
+            print(f"Error inserting recipe into database")
+            print(f"Response: {response}")
+            continue
+
+        print('Recipe #: ', i+1)
+
+    # Sleep for a while to avoid hitting API rate limits
+    time.sleep(1)
 
 

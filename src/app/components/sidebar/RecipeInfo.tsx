@@ -8,13 +8,18 @@ interface RecipeInfoProps {
 }
 
 const RecipeInfo: React.FC<RecipeInfoProps> = ({ recipe, onArrowClick }) => {
+  let title = recipe?.content.split('. Ingredients')[0];
+  title = title?.replace(/recipes/gi, '').trim(); // remove 'recipe' and 'recipes'
+  title = title?.replace(/recipe/gi, '').trim(); // remove 'recipe' and 'recipes'
+  title = title?.charAt(0).toUpperCase() + title!.slice(1); // capitalize first letter
+
   return (
     <div className="flex flex-col bg-slate-100 border-2 border-gray-400 rounded-lg h-full w-full shadow-xl ml-1">
       <div className="relative flex flex-row items-center justify-center p-2">
         <div className="absolute left-2 cursor-pointer" onClick={onArrowClick}>
           <ArrowLeft02Icon color={"#000000"} />
         </div>
-        <div className="text-xl font-bold">{recipe?.metadata.title}</div>
+        <div className="text-lg font-bold text-center px-8">{title}</div>
       </div>
       <div className="flex flex-row px-2 py-1">
         <div className="font-bold mr-1.5">Source:</div>
