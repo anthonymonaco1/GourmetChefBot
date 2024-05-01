@@ -11,7 +11,7 @@ const RecipeInfo: React.FC<RecipeInfoProps> = ({ recipe, onArrowClick }) => {
   let title = recipe?.content.split('. Ingredients')[0];
   title = title?.replace(/recipes/gi, '').trim(); // remove 'recipe' and 'recipes'
   title = title?.replace(/recipe/gi, '').trim(); // remove 'recipe' and 'recipes'
-  title = title?.charAt(0).toUpperCase() + title!.slice(1); // capitalize first letter
+  title = title ? title.charAt(0).toUpperCase() + title.slice(1) : ''; // capitalize first letter
 
   return (
     <div className="flex flex-col bg-slate-100 border-2 border-gray-400 rounded-lg h-full w-full shadow-xl ml-1">
