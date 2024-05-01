@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ask Chef RamsAI!",
-  description: "Explore recipes with this gourmet ChefBot",
+  description: "Explore a variety of recipes with this gourmet ChefBot",
 };
 
 export default function RootLayout({
