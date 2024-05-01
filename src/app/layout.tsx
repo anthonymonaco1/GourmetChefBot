@@ -7,9 +7,6 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Ask Chef RamsAI!",
   description: "Explore a variety of recipes with this gourmet ChefBot",
-  icons: {
-    icon: 'public/ChefBotIcon2.png'
-  }
 };
 
 export default function RootLayout({
