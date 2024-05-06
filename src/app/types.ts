@@ -3,18 +3,29 @@ export interface PageMeta {
   description: string;
   cardImage: string;
 }
+export interface NutritionDataSubclass {
+  nutrient: string,
+  label: string,
+  quantity: number,
+  daily: number,
+  unit: string,
+}
 
 export interface NutritionData {
-  unit: string,
-  nutrient: string, 
+  nutrient: string,
+  label: string,
   quantity: number,
-  daily_value_percentage?: any;
+  daily: number,
+  unit: string,
+  sub: Array<NutritionDataSubclass>
 }
 
 export interface RecipeMetadata {
   title: string,
+  image: string,
   source: string;
   yields: number;
+  calories: number;
   source_url: string;
   nutrition_info: Array<NutritionData>;
 }

@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     );
 
     // Define retriever (returns 10 documents)
-    const retriever = vectorStore.asRetriever(15);
+    const retriever = vectorStore.asRetriever(16);
 
     // Construct conversational retrieval QA chain that returns source docs
     const chain = RunnableSequence.from([

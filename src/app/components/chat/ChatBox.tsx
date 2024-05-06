@@ -219,8 +219,8 @@ export default function ChatBox() {
         <div
           className={
             showRecipeInfo
-              ? "slide-out absolute w-11/12 pb-4"
-              : "slide-in absolute w-11/12 pb-4"
+              ? "grid grid-cols-2 gap-10 slide-out absolute w-11/12 pb-4"
+              : "grid grid-cols-2 gap-10 slide-in absolute w-11/12 pb-4"
           }
         >
           {recipeObjects.length !== 0 ? (

@@ -11,8 +11,8 @@ import time
 load_dotenv('.env.local')
 
 # Connect to Supabase
-url: str = os.getenv("SUPABASE_URL")
-key: str = os.getenv("SUPABASE_ANON_KEY") 
+url: str = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+key: str = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") 
 print(f"Supabase URL: {url}")
 supabase: Client = create_client(url, key)
 
@@ -53,18 +53,30 @@ def generate_embedding(text):
     embedding = embeddingResponse['data'][0]['embedding']
     return embedding
 
+class NutritionSubclass(BaseModel):
+    nutrient: str
+    label: str
+    quantity: float
+    daily: float
+    unit: str
+
 # Model for nutrition info
 class NutritionInfo(BaseModel):
     nutrient: str
+    label: str
     quantity: float
+    daily: float
     unit: str
-    daily_value_percentage: Optional[float] = None
+    sub: List[NutritionSubclass]
 
 # Model for metadata
 class RecipeMetadata(BaseModel):
+    title: str
+    image: str
     source: str
     source_url: str
     yields: int
+    calories: float
     nutrition_info: List[NutritionInfo]
 
 # Model for content to be embedded
@@ -92,16 +104,29 @@ def process_recipe(recipe):
     )
 
     metadata = RecipeMetadata(
+        title=recipe["label"],
+        image=recipe["image"],
         source=recipe["source"],
         source_url=recipe["url"],
         yields=recipe["yield"],
+        calories=recipe['calories'],
         nutrition_info=[
             NutritionInfo(
-                nutrient=key,
-                quantity=value["quantity"],
-                unit=value["unit"],
-                daily_value_percentage=value.get("percentOfDailyNeeds")
-            ) for key, value in recipe["totalNutrients"].items()
+                nutrient=nutrient["label"],
+                label=nutrient["tag"],
+                quantity=nutrient["total"],
+                daily=nutrient["daily"],
+                unit=nutrient["unit"],
+                sub = [
+                    NutritionSubclass(
+                        nutrient=sub_nutrient["label"],
+                        label=sub_nutrient["tag"],
+                        quantity=sub_nutrient["total"],
+                        daily=sub_nutrient["daily"],
+                        unit=sub_nutrient["unit"]
+                    ) for sub_nutrient in nutrient["sub"] 
+                ] if nutrient["label"] in ["Carbs", "Fat"] else []
+            ) for nutrient in recipe["digest"]
         ]
     )
 
