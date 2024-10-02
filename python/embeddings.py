@@ -4,15 +4,19 @@ import json
 import requests
 import os
 from dotenv import load_dotenv
-from supabase_py import create_client, Client
+from supabase import create_client, Client
 import time
+from io import BytesIO  # For handling image data in memory
+from PIL import Image   # For image processing (optional, can be installed via pip install Pillow)
+import uuid             # For generating unique filenames
 
 # Load environment variables
 load_dotenv('.env.local')
 
 # Connect to Supabase
 url: str = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-key: str = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY") 
+# key: str = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+key: str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4d3N3YXZnZWd1eHhiZmR3aHp6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxMTgyNDM4NSwiZXhwIjoyMDI3NDAwMzg1fQ.xfcjFUhqE03ORC4-l3qb8Dp51Y9UynALSg26G_KWEoo'
 print(f"Supabase URL: {url}")
 supabase: Client = create_client(url, key)
 
@@ -92,6 +96,12 @@ class RecipeContent(BaseModel):
 
 # Function to process recipe into content and metadata
 def process_recipe(recipe):
+    # Handle cases where 'yield' is not an integer
+    yields_value = recipe.get("yield", 1)  # Default to 1 if 'yield' is not present
+
+    if isinstance(yields_value, float):
+        yields_value = round(yields_value)
+
     content = RecipeContent(
         title=recipe["label"],
         ingredient_lines=recipe["ingredientLines"],
@@ -105,10 +115,10 @@ def process_recipe(recipe):
 
     metadata = RecipeMetadata(
         title=recipe["label"],
-        image=recipe["image"],
+        image=recipe["image"],  # Will be updated after image is stored
         source=recipe["source"],
         source_url=recipe["url"],
-        yields=recipe["yield"],
+        yields=yields_value,
         calories=recipe['calories'],
         nutrition_info=[
             NutritionInfo(
@@ -124,7 +134,7 @@ def process_recipe(recipe):
                         quantity=sub_nutrient["total"],
                         daily=sub_nutrient["daily"],
                         unit=sub_nutrient["unit"]
-                    ) for sub_nutrient in nutrient["sub"] 
+                    ) for sub_nutrient in nutrient.get("sub", []) 
                 ] if nutrient["label"] in ["Carbs", "Fat"] else []
             ) for nutrient in recipe["digest"]
         ]
@@ -201,6 +211,30 @@ def get_recipes(query):
     )
     return response.json()
 
+# Adjusted function to download and store the image
+def download_and_store_image(image_url, image_name):
+    try:
+        image_response = requests.get(image_url)
+        if image_response.status_code == 200:
+            # Read the image content
+            image_content = image_response.content
+
+            # Upload the image to Supabase Storage
+            supabase.storage.from_('images').upload(
+                path=image_name,
+                file=image_content,
+                file_options={"content-type": "image/jpeg"}  # Set appropriate content type
+            )
+
+            public_url = supabase.storage.from_('images').get_public_url(image_name)
+            return public_url
+        else:
+            print(f"Failed to download image from URL: {image_url}")
+            return None
+    except Exception as e:
+        print(f"Exception occurred while downloading or storing image: {e}")
+        return None
+
 # Iterate over queries
 for i, query in enumerate(queries):
     # Get recipes JSON
@@ -208,10 +242,24 @@ for i, query in enumerate(queries):
     recipes = get_recipes(query)
 
     # Generate embeddings for each recipe and insert data into Supabase
-    hits = recipes["hits"]
-    for i, hit in enumerate(hits):
+    hits = recipes.get("hits", [])
+    for j, hit in enumerate(hits):
         recipe = hit["recipe"]
         content, metadata = process_recipe(recipe)
+
+        # Download and store the image, and update the metadata
+        original_image_url = metadata['image']
+        # Generate a unique filename for the image
+        image_extension = os.path.splitext(original_image_url)[1].split('?')[0]  # Get extension without query params
+        unique_image_name = f"{uuid.uuid4()}{image_extension}"
+
+        stored_image_url = download_and_store_image(original_image_url, unique_image_name)
+
+        if stored_image_url:
+            # Update metadata to point to the new image URL
+            metadata['image'] = stored_image_url
+        else:
+            print(f"Using original image URL due to failure in storing: {original_image_url}")
 
         # Insert `content` and `metadata` into Supabase here
         content_text = serialize_content(content)
@@ -220,18 +268,18 @@ for i, query in enumerate(queries):
         if not embedding:
             continue
 
-        response = supabase.table("documents").insert([{
-            "content": content_text,
-            "embedding": embedding,
-            "metadata": metadata
-        }]).execute()
+        try:
+            response = supabase.table("documents").insert([{
+                "content": content_text,
+                "embedding": embedding,
+                "metadata": metadata
+            }]).execute()
+            print(f"Inserted recipe #{j+1} into the database.")
+        except Exception as exception:
+            print(f"Error in supabase response: {exception}")
 
-        if 'error' in response or 'data' not in response or not response['data']:
-            print(f"Error inserting recipe into database")
-            print(f"Response: {response}")
-            continue
-
-        print('Recipe #: ', i+1)
+        # Sleep briefly to respect API rate limits (optional)
+        time.sleep(0.5)
 
     # Sleep for a while to avoid hitting API rate limits
     time.sleep(1)

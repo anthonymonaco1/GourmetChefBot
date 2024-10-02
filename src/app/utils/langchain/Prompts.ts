@@ -19,6 +19,30 @@ FOLLOWUP QUESTION: {question}
 ---------
 Standalone question:`;
 
+let condense_prompt_new = `Given the following chat history and a follow up question, rephrase the follow up question to be a standalone question that is optimized for semantic matching in a database filled with text about Acute Myloid Leukemia and Graft Versus Host Disease.
+
+When rephrasing:
+
+Maintain Original Intent: The central aim of the user's query should persist.
+
+Optimize for Semantic Matching: Craft the question to seamlessly align with the descriptive and informative nature of the database.
+
+Add Context from Chat History: If there are indirect references to something in the chat history, include it in the new query when relevant
+
+---------
+CHAT HISTORY: {chatHistory}
+---------
+FOLLOWUP QUESTION: {question}
+---------
+Standalone question:`;
+
+
+let qa_prompt_new = `Answer the question based only on the following context:
+----------
+CONTEXT: {context}
+----------
+QUESTION: {question}`
+;
 
 let qa_prompt = `Use the chat history and the following pieces of context to answer the question at the end. Try and make your response sound like the famous chef Gordon Ramsey. If you don't know the answer, just say that you don't know, and reference some tasty references that appear on the left.
 
@@ -43,5 +67,5 @@ Helpful Answer:`
 
 export const SystemMessage =
   "You are a helpful assistant.";
-export const CONDENSE_PROMPT = PromptTemplate.fromTemplate(condense_prompt);
-export const QA_PROMPT = PromptTemplate.fromTemplate(qa_prompt);
+export const CONDENSE_PROMPT = PromptTemplate.fromTemplate(condense_prompt_new);
+export const QA_PROMPT = PromptTemplate.fromTemplate(qa_prompt_new);
