@@ -37,8 +37,3 @@ next-env.d.ts
 
 # recipe jsons
 recipes.json
-
-=3.0.3
-=4.0.8
-=4.2.19
-=8.17.1
