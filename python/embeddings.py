@@ -15,8 +15,7 @@ load_dotenv('.env.local')
 
 # Connect to Supabase
 url: str = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-# key: str = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
-key: str = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4d3N3YXZnZWd1eHhiZmR3aHp6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxMTgyNDM4NSwiZXhwIjoyMDI3NDAwMzg1fQ.xfcjFUhqE03ORC4-l3qb8Dp51Y9UynALSg26G_KWEoo'
+key: str = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 print(f"Supabase URL: {url}")
 supabase: Client = create_client(url, key)
 
