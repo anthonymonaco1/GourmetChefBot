@@ -63,7 +63,7 @@ export default function ChatBox() {
     setLoading(true); // Sets the loading state to true, indicating that the process has started.
     setDisabled(true); // Disables further interactions until the process is complete.
 
-    const response = await fetch("api/chat2", {
+    const response = await fetch("api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -93,8 +93,8 @@ export default function ChatBox() {
 
     // Continues reading the stream and appending the answer.
     const reader = stream.getReader();
-    // let sources = "";
-    // let isSourceMode = false; // This flag will help us determine if we are appending to the 'sources' variable
+    let sources = "";
+    let isSourceMode = false; // This flag will help us determine if we are appending to the 'sources' variable
     // console.log("Reader created:", reader);
 
     try {
@@ -109,23 +109,23 @@ export default function ChatBox() {
         // console.log("Decoded value:", decodedValue);
 
         // If 'decodedValue' contains the marker and we haven't started source mode, start it
-        // if (decodedValue.includes("##SOURCE_DOCUMENTS##")) {
-        //   isSourceMode = true;
-        // }
+        if (decodedValue.includes("##SOURCE_DOCUMENTS##")) {
+          isSourceMode = true;
+        }
 
         // If we're in source mode, append everything to 'sources'
-        // if (isSourceMode) {
-        //   sources += decodedValue;
-        //   decodedValue = ""; // Resetting so it won't be appended to 'tracked_answer' or the chat log
-        // } else {
-        //   systemAnswer += decodedValue;
-        // }
+        if (isSourceMode) {
+          sources += decodedValue;
+          decodedValue = ""; // Resetting so it won't be appended to 'tracked_answer' or the chat log
+        } else {
+          systemAnswer += decodedValue;
+        }
 
         systemAnswer += decodedValue;
         // console.log("Current system answer:", systemAnswer);
 
         // If not in source mode, update the chat log
-        // if (!isSourceMode) {
+        if (!isSourceMode) {
           setChatLog((prev) => {
             const lastMessage = prev.slice(-1)[0];
             const updatedMessage = lastMessage
@@ -136,7 +136,7 @@ export default function ChatBox() {
                 };
             return [...prev.slice(0, -1), updatedMessage];
           });
-        //}
+        }
       }
     } catch (error) {
       console.error(error);
@@ -145,48 +145,46 @@ export default function ChatBox() {
     }
 
     // Processes the sources and retrieves related courses
-    // let sourceSplit = sources.split("##SOURCE_DOCUMENTS##")[1];
+    let sourceSplit = sources.split("##SOURCE_DOCUMENTS##")[1];
 
-    // if (typeof sourceSplit !== "undefined") {
-    //   recipes = JSON.parse(sources.split("##SOURCE_DOCUMENTS##")[1].trim());
-    //   // if no sources were returned, ask for a refined query
-    //   //TODO, fix it so it doesn't change the stream
-    //   if (recipes.length === 0) {
-    //     let noCourseString = `No courses fitting that query were found. Please refine your query.`;
-    //     setChatLog((prev) => {
-    //       const lastMessage = prev.slice(-1)[0];
-    //       const updatedMessage = lastMessage
-    //         ? { ...lastMessage, answer: noCourseString }
-    //         : {
-    //             question: query,
-    //             answer: noCourseString,
-    //           };
-    //       return [...prev.slice(0, -1), updatedMessage];
-    //     });
-    //   }
-    // } else {
-    //   console.log("No sources were returned");
-    // }
+    if (typeof sourceSplit !== "undefined") {
+      recipes = JSON.parse(sources.split("##SOURCE_DOCUMENTS##")[1].trim());
+      // if no sources were returned, ask for a refined query
+      //TODO, fix it so it doesn't change the stream
+      if (recipes.length === 0) {
+        let noCourseString = `No courses fitting that query were found. Please refine your query.`;
+        setChatLog((prev) => {
+          const lastMessage = prev.slice(-1)[0];
+          const updatedMessage = lastMessage
+            ? { ...lastMessage, answer: noCourseString }
+            : {
+                question: query,
+                answer: noCourseString,
+              };
+          return [...prev.slice(0, -1), updatedMessage];
+        });
+      }
+    } else {
+      console.log("No sources were returned");
+    }
 
     // Retrieve the recipe objects
-    // recipes.map(async (recipe: any) => {
-    //   const { data, error } = await supabaseClient
-    //     .from("documents")
-    //     .select("*")
-    //     .eq("metadata", JSON.stringify(recipe.metadata));
+    recipes.map(async (recipe: any) => {
+      const { data, error } = await supabaseClient
+        .from("documents")
+        .select("*")
+        .eq("metadata", JSON.stringify(recipe.metadata));
 
-    //   if (error) {
-    //     console.error(error);
-    //     return;
-    //   } else {
-    //     setRecipeObjects((prevRecipeObjects) => [
-    //       ...prevRecipeObjects,
-    //       data[0],
-    //     ]);
-    //   }
-    // });
-
-    // setAnswer(answer);
+      if (error) {
+        console.error(error);
+        return;
+      } else {
+        setRecipeObjects((prevRecipeObjects) => [
+          ...prevRecipeObjects,
+          data[0],
+        ]);
+      }
+    });
 
     setChatHistory(
       (prevChatHistory) =>
@@ -218,7 +216,7 @@ export default function ChatBox() {
         toastOptions={{ duration: 2000 }}
       />
       <div className="w-1/3 border-r-2 border-eton-blue p-4 overflow-y-auto overflow-x-hidden relative">
-        {/* <div
+        <div
           className={
             showRecipeInfo
               ? "grid grid-cols-2 gap-10 slide-out absolute w-11/12 pb-4"
@@ -250,16 +248,16 @@ export default function ChatBox() {
             recipe={selectedRecipe}
             onArrowClick={() => setShowRecipeInfo(false)}
           />
-        </div> */}
+        </div>
       </div>
       <div className="text-black w-2/3 flex-col h-full">
         <div
           className="border-b-2 border-eton-blue h-5/6 overflow-y-scroll"
           ref={chatContainerRef}
         >
-          {/* <div className="p-5">
+          <div className="p-5">
             <IntroMessage />
-          </div> */}
+          </div>
           {chatLog.map((chat, index) => (
             <Fragment key={index}>
               <div className="flex flex-row justify-end p-6 rounded-2xl ml-16">
