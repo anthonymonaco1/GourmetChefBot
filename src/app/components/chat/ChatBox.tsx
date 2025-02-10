@@ -264,9 +264,8 @@ export default function ChatBox() {
                 >
                   {recipeObjects.length !== 0 ? (
                     recipeObjects.map((recipe) => (
-                      <div className="p-5">
+                      <div className="p-5" key={recipe.id}>
                         <RecipeBox
-                          key={recipe.id}
                           recipe={recipe}
                           onArrowClick={() => recipeArrowClick(recipe)}
                         />
