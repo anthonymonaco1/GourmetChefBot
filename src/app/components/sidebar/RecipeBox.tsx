@@ -12,19 +12,19 @@ interface RecipeBoxProps {
 const RecipeBox: React.FC<RecipeBoxProps> = ({ recipe, onArrowClick }) => {
   return (
     <div
-      className="relative bg-slate-100 border-2 border-gray-400 m-1.5 rounded-xl flex flex-col shadow-lg cursor-pointer"
+      className="relative bg-surface border-2 border-gray-400 m-1.5 rounded-3xl flex flex-col shadow-lg cursor-pointer"
       onClick={onArrowClick}
     >
       <img
         src={recipe.metadata.image}
         alt={recipe.metadata.title}
-        className="rounded-xl"
+        className="rounded-3xl rounded-b-2xl"
         onError={(e) => {
           e.currentTarget.src = image.src;
         }}
       />
       <div className="h-14 flex items-center justify-center">
-        <div className="text-center font-semibold px-4 overflow-hidden line-clamp-2">
+        <div className="text-center font-semibold px-4 overflow-hidden line-clamp-2 text-text">
           {recipe.metadata.title}
         </div>
       </div>

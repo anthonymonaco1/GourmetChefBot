@@ -10,6 +10,8 @@ import RecipeBox from "../sidebar/RecipeBox";
 import RecipeInfo from "../sidebar/RecipeInfo";
 import LoadingDots from "../generics/LoadingDots";
 import IntroMessage from "../generics/IntroMessage";
+import InfoCard from "../generics/InfoCard";
+import { Loader } from "../generics/Loader";
 
 export default function ChatBox() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -209,86 +211,22 @@ export default function ChatBox() {
   }, [chatLog]);
 
   return (
-    <div className="flex flex-grow max-h-9/10">
+    <div className="flex flex-grow max-h-9/10 w-full">
       <Toaster
         position="top-center"
         reverseOrder={false}
         toastOptions={{ duration: 2000 }}
       />
-      <div className="w-1/3 border-r-2 border-eton-blue p-4 overflow-y-auto overflow-x-hidden relative">
-        <div
-          className={
-            showRecipeInfo
-              ? "grid grid-cols-2 gap-10 slide-out absolute w-11/12 pb-4"
-              : "grid grid-cols-2 gap-10 slide-in absolute w-11/12 pb-4"
-          }
-        >
-          {recipeObjects.length !== 0 ? (
-            recipeObjects.map((recipe) => (
-              <RecipeBox
-                key={recipe.id}
-                recipe={recipe}
-                onArrowClick={() => recipeArrowClick(recipe)}
-              />
-            ))
-          ) : (
-            <div className="text-black absolute inset-x-1/5 font-semibold">
-              Relevant recipes will appear here!
-            </div>
-          )}
-        </div>
-        <div
-          className={
-            showRecipeInfo
-              ? "slide-in absolute w-11/12 max-h-97.5 h-97.5"
-              : "slide-out absolute w-11/12 max-h-97.5 h-97.5"
-          }
-        >
-          <RecipeInfo
-            recipe={selectedRecipe}
-            onArrowClick={() => setShowRecipeInfo(false)}
-          />
-        </div>
-      </div>
-      <div className="text-black w-2/3 flex-col h-full">
-        <div
-          className="border-b-2 border-eton-blue h-5/6 overflow-y-scroll"
-          ref={chatContainerRef}
-        >
-          <div className="p-5">
-            <IntroMessage />
-          </div>
-          {chatLog.map((chat, index) => (
-            <Fragment key={index}>
-              <div className="flex flex-row justify-end p-6 rounded-2xl ml-16">
-                <div className="text-black bg-eton-blue brightness-105 shadow-xl text-left px-5 py-2.5 w-fit rounded-3xl rounded-br-sm text-sans text-sm font-medium">
-                  {chat.question}
-                </div>
-              </div>
-
-              <AnimatePresence mode="wait">
-                <motion.div>
-                  <div className="flex flex-row p-6 mr-28 rounded-2xl transition">
-                    <div className="prose max-w-none bg-light-powder-blue text-black shadow-xl text-left px-5 py-2.5 rounded-3xl rounded-bl-sm text-sans text-sm font-medium whitespace-pre-wrap">
-                      {loading && chatLog[chatLog.length - 1] === chat && (
-                        <LoadingDots color="#9CA3AF" style="xl" />
-                      )}
-                      {!(chat.answer === "") && chat.answer}
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </Fragment>
-          ))}
-        </div>
-        <div className="h-1/6 flex items-center justify-center">
-          <div className="bg-slate-100 border-2 border-gray-400 rounded-xl flex items-center justify-center w-11/12 shadow-xl">
+      {chatLog.length === 0 ? (
+        <div className="flex flex-col items-center justify-center space-y-14 w-full">
+          <InfoCard />
+          <div className="bg-slate-100 border-2 border-gray-400 rounded-full flex items-center justify-center w-1/2 shadow-md">
             <form
               className="flex flex-row items-center w-full"
               onSubmit={generateAnswer}
             >
               <input
-                className="h-14 outline-none p-3 rounded-xl w-11/12 resize-none flex items-center bg-slate-100"
+                className="h-16 outline-none p-4 rounded-full w-11/12 resize-none flex items-center bg-slate-100"
                 value={userQuestion}
                 onChange={handleTextChange}
                 placeholder="Ask me about recipes here!"
@@ -298,8 +236,8 @@ export default function ChatBox() {
                 <button
                   type="submit"
                   disabled={!userQuestion}
-                  className={`flex items-center justify-center brightness-105 rounded-xl px-3 py-2 text-white ${
-                    userQuestion ? "bg-eton-blue" : "bg-gray-400"
+                  className={`flex items-center justify-center brightness-105 rounded-full px-3 py-2 text-white ${
+                    userQuestion ? "bg-primary" : "bg-disabled"
                   }`}
                 >
                   <Send />
@@ -308,7 +246,114 @@ export default function ChatBox() {
             </form>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-row w-full">
+          <div className="w-1/3 border-r border-border p-4 overflow-y-auto overflow-x-hidden relative">
+            {recipeObjects.length === 0 ? (
+              <div className="h-full flex items-center justify-center">
+                <Loader />
+              </div>
+            ) : (
+              <>
+                <div
+                  className={
+                    showRecipeInfo
+                      ? "grid grid-cols-2 gap-2 slide-out absolute w-11/12 pb-4 flex"
+                      : "grid grid-cols-2 gap-2 slide-in absolute w-11/12 pb-4 flex"
+                  }
+                >
+                  {recipeObjects.length !== 0 ? (
+                    recipeObjects.map((recipe) => (
+                      <div className="p-5">
+                        <RecipeBox
+                          key={recipe.id}
+                          recipe={recipe}
+                          onArrowClick={() => recipeArrowClick(recipe)}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="justify-self-center">
+                      <Loader />
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={
+                    showRecipeInfo
+                      ? "slide-in absolute w-11/12 max-h-97.5 h-97.5"
+                      : "slide-out absolute w-11/12 max-h-97.5 h-97.5"
+                  }
+                >
+                  <RecipeInfo
+                    recipe={selectedRecipe}
+                    onArrowClick={() => setShowRecipeInfo(false)}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <div className="text-black w-2/3 flex-col h-full">
+            <div
+              className="border-b border-border h-88% overflow-y-scroll"
+              ref={chatContainerRef}
+            >
+              {/* <div className="p-5">
+                <IntroMessage />
+              </div> */}
+              {chatLog.map((chat, index) => (
+                <Fragment key={index}>
+                  <div className="flex flex-row justify-end p-6 rounded-2xl ml-16">
+                    <div className="text-black bg-eton-blue brightness-105 shadow-xl text-left px-5 py-2.5 w-fit rounded-3xl rounded-br-sm text-sans text-sm font-medium">
+                      {chat.question}
+                    </div>
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    <motion.div>
+                      <div className="flex flex-row p-6 mr-28 rounded-2xl transition">
+                        <div className="prose max-w-none bg-light-powder-blue text-black shadow-xl text-left px-5 py-2.5 rounded-3xl rounded-bl-sm text-sans text-sm font-medium whitespace-pre-wrap">
+                          {loading && chatLog[chatLog.length - 1] === chat && (
+                            <LoadingDots color="#9CA3AF" style="xl" />
+                          )}
+                          {!(chat.answer === "") && chat.answer}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </Fragment>
+              ))}
+            </div>
+            <div className="h-12% flex items-center justify-center bg-surface">
+              <div className="bg-slate-100 border-2 border-gray-400 rounded-full flex items-center justify-center w-3/4 shadow-md">
+                <form
+                  className="flex flex-row items-center w-full"
+                  onSubmit={generateAnswer}
+                >
+                  <input
+                    className="h-14 outline-none p-4 rounded-full w-11/12 resize-none flex items-center bg-slate-100"
+                    value={userQuestion}
+                    onChange={handleTextChange}
+                    placeholder="Ask me about recipes here!"
+                    disabled={disabled}
+                  />
+                  <div className="w-1/12 flex items-center justify-center">
+                    <button
+                      type="submit"
+                      disabled={!userQuestion}
+                      className={`flex items-center justify-center brightness-105 rounded-full px-3 py-2 text-white ${
+                        userQuestion ? "bg-primary" : "bg-disabled"
+                      }`}
+                    >
+                      <Send />
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

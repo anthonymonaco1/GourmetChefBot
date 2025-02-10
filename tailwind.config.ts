@@ -22,7 +22,15 @@ const config: Config = {
         "dark-powder-blue": chroma("#3BC6C4").darken(0.5).hex(),
         "light-powder-blue": chroma("#3BC6C4").brighten(0.5).hex(),
         "pseudo-white": '#E5E5E5',
-        "disabled": "#C5C5D1"
+        // "disabled": "#C5C5D1",
+        "dark": "#121212",
+        primary: "#3BC6C4",      // Accent for buttons and interactive elements
+        secondary: "#F4A191",    // A softer complementary color
+        background: "#121212",   // Dark background for modern look
+        surface: "#1F2937",      // Slightly lighter dark for panels/cards
+        text: "#F3F4F6",         // Light text for readability on dark backgrounds
+        border: "#374151",       // Subtle border color
+        disabled: "#6B7280",     // For disabled elements
       },
       minHeight: {
         '1/2': '50%',
@@ -41,6 +49,9 @@ const config: Config = {
       height: {
         '97.5': '97.5%',
         '9/10': '90%',
+        '1/10': '10%',
+        '12%': '12%',
+        '88%': '88%'
       },
       inset: {
         '1/5': '20%'

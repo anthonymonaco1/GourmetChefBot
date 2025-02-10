@@ -14,10 +14,10 @@ const RecipeInfo: React.FC<RecipeInfoProps> = ({ recipe, onArrowClick }) => {
       : null;
 
   return (
-    <div className="flex flex-col bg-slate-100 border-2 border-gray-400 rounded-lg h-full w-full shadow-xl ml-1">
+    <div className="flex flex-col bg-surface border border-border rounded-lg h-full w-full shadow-xl ml-1 text-text p-2">
       <div className="relative flex flex-row items-center justify-center p-2">
         <div className="absolute left-2 cursor-pointer" onClick={onArrowClick}>
-          <ArrowLeft02Icon color={"#000000"} />
+          <ArrowLeft02Icon color={"#F3F4F6"} />
         </div>
         <div className="text-lg font-bold text-center px-8">
           {recipe?.metadata.title}
@@ -52,7 +52,7 @@ const RecipeInfo: React.FC<RecipeInfoProps> = ({ recipe, onArrowClick }) => {
           <div className="font-bold mr-3">% RDI</div>
         </div>
 
-        <div className="border-2 border-gray-400 overflow-y-auto px-2 py-1 rounded-lg">
+        <div className="border-2 border-border overflow-y-auto p-2 rounded-lg">
           <div>
             <span className="font-medium">Calories: </span>
             <span>{calories?.toFixed(2)}</span>
